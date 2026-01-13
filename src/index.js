@@ -8,6 +8,9 @@ const authRoutes = require('./routes/auth');
 
 const app = express();
 
+// Trust proxy (required for rate limiting behind reverse proxy)
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 
@@ -81,11 +84,9 @@ async function startServer() {
     await sequelize.authenticate();
     console.log('✅ Database connection established successfully.');
     
-    // Sync models (in development)
-    if (process.env.NODE_ENV === 'development') {
-      await sequelize.sync({ alter: true });
-      console.log('✅ Database models synchronized.');
-    }
+    // Sync models (creates tables if they don't exist)
+    await sequelize.sync({ alter: true });
+    console.log('✅ Database models synchronized.');
     
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
