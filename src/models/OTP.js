@@ -73,3 +73,5 @@ module.exports = (sequelize, DataTypes) => {
   return OTP;
 };
 
+
+

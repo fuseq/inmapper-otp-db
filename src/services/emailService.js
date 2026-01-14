@@ -18,6 +18,15 @@ class EmailService {
       ? 'Giriş Doğrulama Kodunuz' 
       : 'E-posta Doğrulama Kodunuz';
 
+    const headerText = type === 'login' ? 'Giriş Yapalım' : 'Hesabınızı Doğrulayın';
+    const bodyText = type === 'login' 
+      ? 'inMapper sistemine giriş yapmak için bu kodu kullanın.'
+      : 'inMapper hesabınızı doğrulamak için bu kodu kullanın.';
+
+    const otpDigits = otpCode.split('').map(digit => 
+      `<span style="display:inline-block;width:44px;height:56px;line-height:56px;text-align:center;font-size:28px;font-weight:700;color:#1a1a2e;background:#f0f0f5;border-radius:8px;margin:0 4px;">${digit}</span>`
+    ).join('');
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -25,46 +34,44 @@ class EmailService {
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${subject}</title>
-        <style>
-          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #0a0a0f; }
-          .container { max-width: 500px; margin: 0 auto; padding: 40px 20px; }
-          .card { background: linear-gradient(145deg, #1a1a2e 0%, #16162a 100%); border-radius: 16px; padding: 40px; border: 1px solid rgba(255,255,255,0.1); }
-          .logo { text-align: center; margin-bottom: 30px; }
-          .logo-text { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-          .greeting { color: #ffffff; font-size: 18px; margin-bottom: 20px; }
-          .message { color: #a0a0b0; font-size: 14px; line-height: 1.6; margin-bottom: 30px; }
-          .otp-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 25px; text-align: center; margin-bottom: 30px; }
-          .otp-code { font-size: 36px; font-weight: 700; color: #ffffff; letter-spacing: 8px; font-family: 'Courier New', monospace; }
-          .expiry { color: #ffc107; font-size: 12px; margin-top: 10px; }
-          .warning { background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 8px; padding: 15px; margin-bottom: 20px; }
-          .warning-text { color: #ffc107; font-size: 12px; margin: 0; }
-          .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
-        </style>
       </head>
-      <body>
-        <div class="container">
-          <div class="card">
-            <div class="logo">
-              <span class="logo-text">🔐 OTP Auth</span>
-            </div>
-            <div class="greeting">Merhaba ${name},</div>
-            <div class="message">
-              ${type === 'login' 
-                ? 'Hesabınıza giriş yapmak için aşağıdaki doğrulama kodunu kullanın.' 
-                : 'E-posta adresinizi doğrulamak için aşağıdaki kodu kullanın.'}
-            </div>
-            <div class="otp-box">
-              <div class="otp-code">${otpCode}</div>
-              <div class="expiry">Bu kod ${process.env.OTP_EXPIRES_MINUTES || 5} dakika içinde geçerliliğini yitirecek</div>
-            </div>
-            <div class="warning">
-              <p class="warning-text">⚠️ Bu kodu kimseyle paylaşmayın. Resmi temsilcilerimiz asla kodunuzu sormaz.</p>
-            </div>
-            <div class="footer">
-              Bu e-postayı siz talep etmediyseniz, lütfen dikkate almayın.
-            </div>
-          </div>
-        </div>
+      <body style="margin:0;padding:0;background-color:#f5f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="min-height:100vh;">
+          <tr>
+            <td align="center" style="padding:40px 20px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:440px;background:#ffffff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+                <tr>
+                  <td style="padding:40px 40px 32px;text-align:center;">
+                    <!-- Logo -->
+                    <img src="https://inmapper-otp.netlify.app/inmapper.png" alt="inMapper" style="height:48px;width:auto;margin-bottom:32px;">
+                    
+                    <!-- Header -->
+                    <h1 style="margin:0 0 12px;font-size:26px;font-weight:700;color:#1a1a2e;">${headerText}</h1>
+                    
+                    <!-- Body Text -->
+                    <p style="margin:0 0 8px;font-size:15px;color:#64748b;line-height:1.5;">${bodyText}</p>
+                    <p style="margin:0 0 32px;font-size:14px;color:#94a3b8;">Bu kod ${process.env.OTP_EXPIRES_MINUTES || 5} dakika içinde geçersiz olacak.</p>
+                    
+                    <!-- OTP Code -->
+                    <div style="margin-bottom:32px;">
+                      ${otpDigits}
+                    </div>
+                    
+                    <!-- Info Text -->
+                    <p style="margin:0 0 8px;font-size:14px;color:#64748b;">Bu kod ile güvenli giriş yapılacak:</p>
+                    <p style="margin:0 0 24px;font-size:15px;color:#3b82f6;font-weight:500;">${email}</p>
+                    
+                    <!-- Footer -->
+                    <p style="margin:0;font-size:13px;color:#94a3b8;">Bu e-postayı siz talep etmediyseniz, güvenle görmezden gelebilirsiniz.</p>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Bottom Footer -->
+              <p style="margin:24px 0 0;font-size:12px;color:#94a3b8;">© ${new Date().getFullYear()} inMapper - Mapping and Location Technologies</p>
+            </td>
+          </tr>
+        </table>
       </body>
       </html>
     `;
@@ -99,4 +106,6 @@ class EmailService {
 }
 
 module.exports = new EmailService();
+
+
 

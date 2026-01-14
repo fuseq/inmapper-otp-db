@@ -36,3 +36,5 @@ db.Session.belongsTo(db.User, { foreignKey: 'userId', as: 'user' });
 
 module.exports = db;
 
+
+
