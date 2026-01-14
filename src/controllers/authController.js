@@ -1,4 +1,5 @@
-const { User } = require('../models');
+const { User, Permission } = require('../models');
+const { Op } = require('sequelize');
 const otpService = require('../services/otpService');
 const tokenService = require('../services/tokenService');
 
@@ -206,6 +207,7 @@ const authController = {
   async validateToken(req, res) {
     try {
       const token = req.query.token || req.body.token;
+      const resource = req.query.resource || req.body.resource;
 
       const validation = await tokenService.validateSession(token);
       
@@ -216,10 +218,37 @@ const authController = {
         });
       }
 
+      // Get user permissions
+      const user = await User.findByPk(validation.user.id, {
+        include: [{
+          model: Permission,
+          as: 'permissions',
+          where: { canAccess: true },
+          required: false
+        }]
+      });
+
+      const permissions = user?.permissions?.map(p => p.resource) || [];
+      const isAdmin = user?.isAdmin || false;
+
+      // Check specific resource access if provided
+      let hasResourceAccess = true;
+      if (resource && !isAdmin) {
+        const hasPermission = permissions.includes(resource);
+        if (!hasPermission) {
+          hasResourceAccess = false;
+        }
+      }
+
       res.json({
         valid: true,
-        user: validation.user,
-        session: validation.session
+        user: {
+          ...validation.user,
+          isAdmin,
+          permissions
+        },
+        session: validation.session,
+        hasResourceAccess
       });
     } catch (error) {
       console.error('Validate token error:', error);

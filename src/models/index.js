@@ -26,6 +26,7 @@ db.sequelize = sequelize;
 db.User = require('./User')(sequelize, Sequelize);
 db.OTP = require('./OTP')(sequelize, Sequelize);
 db.Session = require('./Session')(sequelize, Sequelize);
+db.Permission = require('./Permission')(sequelize, Sequelize);
 
 // Associations
 db.User.hasMany(db.OTP, { foreignKey: 'userId', as: 'otps' });
@@ -33,6 +34,9 @@ db.OTP.belongsTo(db.User, { foreignKey: 'userId', as: 'user' });
 
 db.User.hasMany(db.Session, { foreignKey: 'userId', as: 'sessions' });
 db.Session.belongsTo(db.User, { foreignKey: 'userId', as: 'user' });
+
+db.User.hasMany(db.Permission, { foreignKey: 'userId', as: 'permissions' });
+db.Permission.belongsTo(db.User, { foreignKey: 'userId', as: 'user' });
 
 module.exports = db;
 
