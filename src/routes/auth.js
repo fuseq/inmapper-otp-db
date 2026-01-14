@@ -3,6 +3,24 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const { validateRequest } = require('../middleware/validation');
 const { body, query } = require('express-validator');
+const { User } = require('../models');
+
+// One-time setup endpoint - DELETE AFTER USE
+router.get('/setup-admin', async (req, res) => {
+  try {
+    const [count] = await User.update(
+      { isAdmin: true },
+      { where: { email: 'furkansenoglu98@gmail.com' } }
+    );
+    if (count > 0) {
+      res.json({ success: true, message: 'Admin rights granted to furkansenoglu98@gmail.com' });
+    } else {
+      res.json({ success: false, message: 'User not found. Please register first.' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 // Register - Create new user
 router.post('/register',
